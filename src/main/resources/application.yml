@@ -3,6 +3,11 @@ spring:
     name: ping-ai-agent
   profiles:
     active: local
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: qwen2.5:0.5b
 server:
   port: 8123
   servlet:
