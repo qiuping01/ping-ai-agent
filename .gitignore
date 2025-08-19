@@ -1,6 +1,6 @@
 ### local ###
 application-local.yml
-API.java
+TestAPI.java
 
 HELP.md
 target/
