@@ -80,6 +80,12 @@
             <artifactId>volcengine-java-sdk-ark-runtime</artifactId>
             <version>LATEST</version>
         </dependency>
+        <!--  支持结构化输出  -->
+        <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-generator</artifactId>
+            <version>4.38.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
