@@ -1,6 +1,7 @@
 package com.ping.aiagent.app;
 
 import com.ping.aiagent.advisor.MyLoggerAdvisor;
+import com.ping.aiagent.advisor.ReReadingAdvisor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -40,7 +41,9 @@ public class LoveApp {
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(chatMemory),
                         // 自定义日志 Advisor，可按需开启
-                        new MyLoggerAdvisor()
+                        new MyLoggerAdvisor(),
+                        // 自定义推理增强 Advisor，可按需开启
+                        new ReReadingAdvisor()
                 ) // 默认拦截器
                 .build();
     }
