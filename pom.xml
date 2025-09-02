@@ -43,10 +43,11 @@
             <artifactId>hutool-all</artifactId>
             <version>5.8.38</version>
         </dependency>
-        <!--  knife4j  -->
+        <!--  knife4j-openapi3  -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter
+            </artifactId>
             <version>4.4.0</version>
         </dependency>
         <!--  阿里云灵积  -->
@@ -97,6 +98,18 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-markdown-document-reader</artifactId>
             <version>1.0.0-M6</version>
+        </dependency>
+        <!-- MySQL 驱动 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version> <!-- 可更新至最新版本 -->
+            <scope>runtime</scope> <!-- 通常只需运行时生效 -->
+        </dependency>
+        <!-- Spring JDBC (简化数据库操作) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
         <dependency>
