@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -28,6 +30,10 @@ public class LoveApp {
     // 用于从恋爱知识库中检索相关内容的向量存储客户端
     @Resource
     private VectorStore loveAppVectorStore;
+
+    // 用于从云恋爱知识库中检索
+    @Resource
+    private Advisor loveAppRagCloudAdvisor;
 
 
     // 调用 AI
@@ -135,11 +141,14 @@ public class LoveApp {
                 //  Advisor 2: 注入日志记录顾问
                 .advisors(new MyLoggerAdvisor())
 
-                //  Advisor 3: 注入核心的 RAG 检索顾问（最重要的环节）
-                //  - 目的：将用户问题发送到向量知识库进行语义搜索，获取相关知识片段
+                //  Advisor 3-1: 注入核心的 RAG 检索顾问（最重要的环节）
+                //  - 目的：将用户问题发送到向量知识库进行语义搜索，获取相关知识片段（应用 RAG 知识库问答）
                 //  - 参数: loveAppVectorStore 恋爱应用专用的向量存储客户端，包含嵌入后的知识数据
                 //  - 机制：该顾问会将检索到的相关知识作为上下文注入到 Prompt 中，增强 LLM 的回答能力
-                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
+//                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
+
+                //  Advisor 3-2: 应用 RAG 检索增强服务 （基于云知识库服务）
+                .advisors(loveAppRagCloudAdvisor)
 
                 // 执行调用：将组装好的提示链发送给AI模型并获取响应
                 .call()
