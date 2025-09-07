@@ -31,6 +31,9 @@ public class LoveApp {
     @Resource
     private VectorStore loveAppVectorStore;
 
+    @Resource
+    private VectorStore pgVectorVectorStore;
+
     // 用于从云恋爱知识库中检索
     @Resource
     private Advisor loveAppRagCloudAdvisor;
@@ -141,14 +144,17 @@ public class LoveApp {
                 //  Advisor 2: 注入日志记录顾问
                 .advisors(new MyLoggerAdvisor())
 
-                //  Advisor 3-1: 注入核心的 RAG 检索顾问（最重要的环节）
+                //  Advisor 3-1: 注入核心的 RAG 检索顾问（最重要的环节,基于本地文件）
                 //  - 目的：将用户问题发送到向量知识库进行语义搜索，获取相关知识片段（应用 RAG 知识库问答）
                 //  - 参数: loveAppVectorStore 恋爱应用专用的向量存储客户端，包含嵌入后的知识数据
                 //  - 机制：该顾问会将检索到的相关知识作为上下文注入到 Prompt 中，增强 LLM 的回答能力
 //                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
 
                 //  Advisor 3-2: 应用 RAG 检索增强服务 （基于云知识库服务）
-                .advisors(loveAppRagCloudAdvisor)
+                //.advisors(loveAppRagCloudAdvisor)
+
+                // Advisor 3-3: 应用 RAG 检索增强服务 （基于PGVector）
+                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
 
                 // 执行调用：将组装好的提示链发送给AI模型并获取响应
                 .call()
