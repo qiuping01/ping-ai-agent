@@ -20,6 +20,10 @@ public class PgVectorVectorStoreConfig {
     @Resource
     private LoveAppDocumentLoader loveAppDocumentLoader;
 
+    @Resource
+    private MyKeywordEnricher myKeywordEnricher; // 注入关键词丰富器
+
+
     @Bean
     public VectorStore pgVectorVectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel dashscopeEmbeddingModel) {
         PgVectorStore vectorStore = PgVectorStore.builder(jdbcTemplate, dashscopeEmbeddingModel)
@@ -31,8 +35,12 @@ public class PgVectorVectorStoreConfig {
                 .vectorTableName("vector_store")     // Optional: defaults to "vector_store"
                 .maxDocumentBatchSize(10000)         // Optional: defaults to 10000
                 .build();
+
         List<Document> documents = loveAppDocumentLoader.loadMarkdowns();
-        vectorStore.add(documents);
+
+        // 对文档进行关键词丰富
+        List<Document> enrichedDocuments = myKeywordEnricher.enrichDocuments(documents);
+        vectorStore.add(enrichedDocuments);// 添加丰富后的文档
         return vectorStore;
     }
 }
