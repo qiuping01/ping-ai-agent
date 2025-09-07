@@ -25,18 +25,23 @@ public class LoveAppVectorConfig {
     @Resource
     private LoveAppDocumentLoader loveAppDocumentLoader;
 
+    @Resource
+    private MyTokenTextSplitter myTokenTextSplitter;
+
     @Bean
     VectorStore loveAppVectorStore(EmbeddingModel dashscopeEmbeddingModel) {
         SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel).build();
+        //添加文档
         List<Document> documentList = loveAppDocumentLoader.loadMarkdowns();
-
+        //添加切词器自主切分文档
+        List<Document> splitDocuments = myTokenTextSplitter.splitCustomized(documentList);
         // 添加检查，如果文档为空，抛出异常，阻止Bean创建
-        if (documentList.isEmpty()) {
+        if (splitDocuments.isEmpty()) {
             throw new IllegalStateException("初始化失败：未加载到任何Markdown文档，请检查'classpath:document/'路径下是否存在.md文件。");
         }
-
-        simpleVectorStore.add(documentList);
-        log.info("恋爱知识向量库初始化成功，共加载了 {} 篇文档。", documentList.size());
+        simpleVectorStore.add(splitDocuments);
+        log.info("恋爱知识文档加载成功，共加载了 {} 篇文档。", documentList.size());
+        log.info("恋爱知识向量库初始化成功，共切分了 {} 篇文档。", splitDocuments.size());
         return simpleVectorStore;
     }
 }
