@@ -16,7 +16,7 @@ import java.util.List;
 public class LoveAppDocumentLoader {
 
     // 构造器注入
-    private final ResourcePatternResolver  resourcePatternResolver;
+    private final ResourcePatternResolver resourcePatternResolver;
 
     public LoveAppDocumentLoader(ResourcePatternResolver resourcePatternResolver) {
         this.resourcePatternResolver = resourcePatternResolver;
@@ -24,26 +24,30 @@ public class LoveAppDocumentLoader {
 
     /**
      * 加载多篇 Markdown文件
+     *
      * @return
      */
-    public List<Document> loadMarkdowns(){
+    public List<Document> loadMarkdowns() {
         List<Document> allDocuments = new ArrayList<>();
         try {
             Resource[] resources = resourcePatternResolver.getResources("classpath:document/*.md");
             for (Resource resource : resources) {
                 String fileName = resource.getFilename();
+                // 提取文档名的倒数第 6 和 5 个字作为标签
+                String status = fileName.substring(fileName.length() - 6, fileName.length() - 4);
                 // 通过 Mar؜kdownDocumentReaderConfig 文؜档加载配置来指定读取文档的细节
                 MarkdownDocumentReaderConfig config = MarkdownDocumentReaderConfig.builder()
                         .withHorizontalRuleCreateDocument(true)
                         .withIncludeCodeBlock(false)
                         .withIncludeBlockquote(false)
                         .withAdditionalMetadata("filename", fileName) // 将文件名添加到元数据中
+                        .withAdditionalMetadata("status", status) // 添加状态到元数据中
                         .build();
                 MarkdownDocumentReader markdownDocumentReader = new MarkdownDocumentReader(resource, config);
                 allDocuments.addAll(markdownDocumentReader.get());
             }
         } catch (Exception e) {
-            log.error("Markdown 文档加载失败",e);
+            log.error("Markdown 文档加载失败", e);
         }
         return allDocuments;
     }

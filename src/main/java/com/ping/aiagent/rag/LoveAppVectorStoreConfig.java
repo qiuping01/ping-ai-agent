@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-public class LoveAppVectorConfig {
+public class LoveAppVectorStoreConfig {
 
     @Resource
     private LoveAppDocumentLoader loveAppDocumentLoader;
