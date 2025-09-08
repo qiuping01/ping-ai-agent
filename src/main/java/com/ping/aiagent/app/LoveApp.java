@@ -2,6 +2,7 @@ package com.ping.aiagent.app;
 
 import com.ping.aiagent.advisor.MyLoggerAdvisor;
 import com.ping.aiagent.chatmemory.FileBasedChatMemory;
+import com.ping.aiagent.rag.LoveAppRagCustomAdvisorFactory;
 import com.ping.aiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -160,7 +161,13 @@ public class LoveApp {
                 //.advisors(loveAppRagCloudAdvisor)
 
                 // Advisor 3-3: 应用 RAG 检索增强服务 （基于PGVector）
-                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+//                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+
+                // Advisor 4: 自定义检索增强过滤器
+                .advisors(LoveAppRagCustomAdvisorFactory
+                        .createLoveAppRagCustomAdvisor(pgVectorVectorStore,
+                                "单身")
+                )
 
                 // 执行调用：将组装好的提示链发送给AI模型并获取响应
                 .call()
