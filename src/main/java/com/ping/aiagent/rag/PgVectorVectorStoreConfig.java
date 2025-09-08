@@ -20,8 +20,8 @@ public class PgVectorVectorStoreConfig {
     @Resource
     private LoveAppDocumentLoader loveAppDocumentLoader;
 
-    @Resource
-    private MyKeywordEnricher myKeywordEnricher; // 注入关键词丰富器
+//    @Resource
+//    private MyKeywordEnricher myKeywordEnricher; // 注入关键词丰富器
 
 
     @Bean
@@ -39,8 +39,9 @@ public class PgVectorVectorStoreConfig {
         List<Document> documents = loveAppDocumentLoader.loadMarkdowns();
 
         // 对文档进行关键词丰富
-        List<Document> enrichedDocuments = myKeywordEnricher.enrichDocuments(documents);
-        vectorStore.add(enrichedDocuments);// 添加丰富后的文档
+//        List<Document> enrichedDocuments = myKeywordEnricher.enrichDocuments(documents);
+
+        vectorStore.add(documents);
         return vectorStore;
     }
 }

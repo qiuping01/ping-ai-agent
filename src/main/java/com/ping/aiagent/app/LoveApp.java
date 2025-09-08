@@ -2,6 +2,7 @@ package com.ping.aiagent.app;
 
 import com.ping.aiagent.advisor.MyLoggerAdvisor;
 import com.ping.aiagent.chatmemory.FileBasedChatMemory;
+import com.ping.aiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -28,15 +29,18 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 public class LoveApp {
 
     // 用于从恋爱知识库中检索相关内容的向量存储客户端
-    @Resource
-    private VectorStore loveAppVectorStore;
+//    @Resource
+//    private VectorStore loveAppVectorStore;
 
     @Resource
     private VectorStore pgVectorVectorStore;
 
     // 用于从云恋爱知识库中检索
+//    @Resource
+//    private Advisor loveAppRagCloudAdvisor;
+
     @Resource
-    private Advisor loveAppRagCloudAdvisor;
+    private QueryRewriter queryRewriter; // 引入查询重写
 
 
     // 调用 AI
@@ -128,11 +132,13 @@ public class LoveApp {
      * @return        由AI生成的、基于恋爱知识库和对话历史的回答内容
      */
     public String doChatWithRag(String message, String chatId) {
-
+        // 查询重写
+        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
         // 构建并执行复杂的对话链（Chain），使用Fluent API进行链式调用
         ChatResponse chatResponse = chatClient
                 .prompt() // 发起一个提示词（Prompt）构建流程
-                .user(message) // 设置用户输入为本次对话的主要查询内容
+                // 使用改写后的查询
+                .user(rewrittenMessage) // 设置用户输入为本次对话的主要查询内容
 
                 //  Advisor 1: 配置对话记忆检索顾问
                 //  - 目的：为LLM提供对话上下文，实现多轮连贯对话
