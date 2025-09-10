@@ -1,3 +1,11 @@
+### local ###
+application-local.yml
+TestAPI.java
+tmp
+
+### MyFile ###
+AI Super Agent
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar

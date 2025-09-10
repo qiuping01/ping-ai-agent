@@ -12,5 +12,4 @@ public class HealthController {
     public BaseResponse<String> healthCheck() {
         return ResultUtils.success("ok");
     }
-
 }
