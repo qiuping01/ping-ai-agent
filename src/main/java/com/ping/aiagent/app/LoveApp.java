@@ -163,7 +163,7 @@ public class LoveApp {
                 // Advisor 3-3: 应用 RAG 检索增强服务 （基于PGVector）
 //                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
 
-                // Advisor 4: 自定义检索增强过滤器
+                // Advisor 3-4: 应用自定义的 RAG 检索增强过滤器（文档查询器 + 上下文增强器）
                 .advisors(LoveAppRagCustomAdvisorFactory
                         .createLoveAppRagCustomAdvisor(pgVectorVectorStore,
                                 "单身")
