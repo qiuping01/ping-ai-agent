@@ -4,12 +4,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
-class FileOperationToolTest {
+class FileOperationToolForLocalTest {
 
     @Test
     void readFile() {
-        FileOperationTool fileOperationTool = new FileOperationTool();
+        FileOperationToolForLocal fileOperationTool = new FileOperationToolForLocal();
         String fileName = "AI 恋爱大师.txt";
         String result = fileOperationTool.readFile(fileName);
         Assertions.assertNotNull(result);
@@ -17,7 +19,7 @@ class FileOperationToolTest {
 
     @Test
     void writeFile() {
-        FileOperationTool fileOperationTool = new FileOperationTool();
+        FileOperationToolForLocal fileOperationTool = new FileOperationToolForLocal();
         String fileName = "AI 恋爱大师.txt";
         String content = "AI 恋爱大师的开发流程";
         String result = fileOperationTool.writeFile(fileName,content);
