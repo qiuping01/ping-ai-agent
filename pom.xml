@@ -124,6 +124,13 @@
             <version>1.0.0-M6</version>
         </dependency>
 
+        <!-- 添加腾讯云COS Java SDK依赖 -->
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>5.6.245</version> <!-- 请检查最新版本 -->
+        </dependency>
+
 
 
         <dependency>

@@ -1,7 +1,6 @@
 package com.ping.aiagent.tools;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IORuntimeException;
 import com.ping.aiagent.contant.FileConstant;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -12,7 +11,7 @@ import org.springframework.ai.tool.annotation.ToolParam;
  * 1. 读写方法
  * 2. 返回类型：直接返回 String 类型，将工具执行完的结果直接作为上下文发送给 AI
  */
-public class FileOperationTool {
+public class FileOperationToolForLocal {
 
     // 定义一个读写文件的根路径
     private final String FILE_DIR = FileConstant.FILE_SAVE_DIR + "/file";
