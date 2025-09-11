@@ -1,5 +1,6 @@
 package com.ping.aiagent.tools;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbacks;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 集中的工具注册类
  */
+@Slf4j
 @Configuration
 public class ToolRegistration {
 
@@ -24,6 +26,7 @@ public class ToolRegistration {
      */
     @Bean
     public ToolCallback[] allTools() {
+        log.info("创建工具调用..."); // 添加日志
         FileOperationToolForLocal fileOperationToolForLocal = new FileOperationToolForLocal();
         PDFGenerationTool pdfGenerationTool = new PDFGenerationTool();
         ResourceDownloadTool resourceDownloadTool = new ResourceDownloadTool();
