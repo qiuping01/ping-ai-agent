@@ -12,8 +12,14 @@ spring:
   # 启用 mcp
     mcp:
       client:
-        stdio:
-          servers-configuration: classpath:mcp-servers.json
+        sse:
+          connections:
+            sever1:
+              url: http://localhost:8127
+#        stdio:
+#          servers-configuration: classpath:mcp-servers.json
+
+
 #  ai:
 #    ollama:
 #      base-url: http://localhost:11434
