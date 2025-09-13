@@ -152,7 +152,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 引入mcp服务 -->
+        <!-- Spring AI MCP Client -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-mcp-client-spring-boot-starter</artifactId>
