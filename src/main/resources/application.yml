@@ -3,6 +3,17 @@ spring:
     name: ping-ai-agent
   profiles:
     active: local
+  # 启用工具调用内容和结果的记录
+  ai:
+    tools:
+      observations:
+        include-content: true
+
+  # 启用 mcp
+    mcp:
+      client:
+        stdio:
+          servers-configuration: classpath:mcp-servers.json
 #  ai:
 #    ollama:
 #      base-url: http://localhost:11434
@@ -33,3 +44,4 @@ knife4j:
 logging:
   level:
     org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.springframework.ai: DEBUG

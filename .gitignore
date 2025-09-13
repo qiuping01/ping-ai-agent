@@ -2,6 +2,7 @@
 application-local.yml
 TestAPI.java
 tmp
+mcp-servers.json
 
 ### MyFile ###
 AI Super Agent
