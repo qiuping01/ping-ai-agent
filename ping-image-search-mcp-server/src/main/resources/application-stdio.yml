@@ -1,0 +1,15 @@
+spring:
+  ai:
+    mcp:
+      server:
+        name: ping-image-search-mcp-server
+        version: 0.0.1
+        type: SYNC
+        # stdio
+        stdio: true
+  # stdio
+  main:
+    # 因为是本地传输，不开启web项目
+    web-application-type: none
+    # ☆ stdio 基于标准的输入输出传递信息，保证在项目的过程中不要去打印控制台的信息
+    banner-mode: off
