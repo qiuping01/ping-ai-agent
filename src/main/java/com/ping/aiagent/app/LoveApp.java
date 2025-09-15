@@ -197,8 +197,17 @@ public class LoveApp {
      * @return
      */
     public String doChatWithTools(String message, String chatId) {
+         String textPrompt = """
+                 您是一个恋爱助手，可以帮助用户生成个性化的恋爱文档，而这些恋爱档案信息应包含：
+                 用户当前的感情状态，以及用户的疑问和对应的解决方法。
+                 当用户要求生成恋爱相关文档并发送到邮箱时，您可以使用LoveDocumentTool工具。
+                 这个工具需要以下参数：
+                 - recipientEmail: 收件人邮箱地址
+                 - loveContent: 恋爱文档内容
+                 - subject: 邮件主题（可选）
+                """;
         ChatResponse response = chatClient
-                .prompt()
+                .prompt(textPrompt)
                 .user(message)
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
