@@ -36,6 +36,7 @@ public class ToolRegistration {
         // 添加默认发件人
         EmailTool emailTool = new EmailTool(mailSender, defaultFromEmail);
         LoveDocumentTool loveDocumentTool = new LoveDocumentTool(emailTool, defaultFromEmail);
+        TerminateTool terminateTool = new TerminateTool();
         return ToolCallbacks.from(
                 fileOperationToolForLocal,
                 pdfGenerationTool,
@@ -44,7 +45,8 @@ public class ToolRegistration {
                 webSearchTool,
                 webScrapingTool,
                 emailTool,
-                loveDocumentTool
+                loveDocumentTool,
+                terminateTool
         );
     }
 }
