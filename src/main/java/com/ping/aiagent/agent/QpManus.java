@@ -46,7 +46,7 @@ public class QpManus extends ToolCallAgent {
         this.setNextStepPrompt(NEXT_STEP_PROMPT);
 
         // 设置最大执行步骤数
-        this.setMaxSteps(20);
+        this.setMaxSteps(10);
 
         // 初始化 AI 对话客户端
         ChatClient chatClient = ChatClient.builder(dashscopeChatModel)

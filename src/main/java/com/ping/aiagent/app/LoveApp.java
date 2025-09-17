@@ -19,6 +19,7 @@ import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.ToolCallbacks;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -101,6 +102,44 @@ public class LoveApp {
         log.info("content:{}", content);
         return content;
     }
+
+    /**
+     * AI 基础对话（支持多轮对话记忆和流式响应）
+     *
+     * @param message 用户输入的消息内容，不能为空
+     * @param chatId 对话会话ID，用于维护上下文记忆，不能为空
+     * @return Flux<String> 流式返回AI响应内容的各个片段
+     * @throws IllegalArgumentException 当参数为空时抛出
+     */
+    public Flux<String> doChatByStream(String message, String chatId) {
+        // 参数验证
+        if (message == null || message.trim().isEmpty()) {
+            return Flux.error(new IllegalArgumentException("消息内容不能为空"));
+        }
+        if (chatId == null || chatId.trim().isEmpty()) {
+            return Flux.error(new IllegalArgumentException("对话ID不能为空"));
+        }
+
+        log.info("开始流式对话 - chatId: {}, message: {}", chatId, message);
+
+        // 核心逻辑
+        return chatClient
+                .prompt()
+                .user(message) // 设置用户消息
+                // 配置对话记忆参数
+                .advisors(spec -> spec
+                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)  // 指定对话会话ID
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))       // 设置记忆检索数量（最近10条）
+                .stream()
+                .content()
+                // 添加日志记录
+                .doOnNext(chunk -> log.debug("接收到流式内容: {}", chunk))
+                .doOnComplete(() -> log.info("流式对话完成 - chatId: {}", chatId))
+                .doOnError(error -> log.error("流式对话失败 - chatId: {}, error: {}",
+                        chatId, error.getMessage(), error));
+    }
+
+
 
     record LoveReport(String title, List<String> suggestions) {
     }
