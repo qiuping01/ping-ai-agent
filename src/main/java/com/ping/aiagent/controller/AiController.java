@@ -1,5 +1,6 @@
 package com.ping.aiagent.controller;
 
+import com.ping.aiagent.agent.QpManus;
 import com.ping.aiagent.app.LoveApp;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
@@ -90,4 +91,15 @@ public class AiController {
         return sseEmitter;
     }
 
+    /**
+     * 流式调用 Manus 超级智能体
+     *
+     * @param message
+     * @return
+     */
+    @GetMapping("/manus/chat")
+    public SseEmitter doChatWithManus(String message) {
+        QpManus qpManus = new QpManus(allTools, dashscopeChatModel);
+        return qpManus.runStream(message);
+    }
 }
