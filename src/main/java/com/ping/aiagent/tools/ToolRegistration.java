@@ -37,6 +37,7 @@ public class ToolRegistration {
         EmailTool emailTool = new EmailTool(mailSender, defaultFromEmail);
         LoveDocumentTool loveDocumentTool = new LoveDocumentTool(emailTool, defaultFromEmail);
         TerminateTool terminateTool = new TerminateTool();
+        PPTGenerationTool pptGenerationTool = new PPTGenerationTool();
         return ToolCallbacks.from(
                 fileOperationToolForLocal,
                 pdfGenerationTool,
@@ -46,7 +47,8 @@ public class ToolRegistration {
                 webScrapingTool,
                 emailTool,
                 loveDocumentTool,
-                terminateTool
+                terminateTool,
+                pptGenerationTool
         );
     }
 }

@@ -1,228 +1,175 @@
 package com.ping.aiagent.tools;
 
 import cn.hutool.core.io.FileUtil;
-import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.List;
-import com.itextpdf.layout.element.ListItem;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
-import com.itextpdf.layout.properties.UnitValue;
 import com.ping.aiagent.contant.FileConstant;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
-/**
- * PDF生成工具
- * <p>
- * 支持Markdown语法解析，生成精美的PDF文档
- */
-@Slf4j
 public class PDFGenerationTool {
 
-    // Markdown语法正则表达式
-    private static final Pattern HEADER_PATTERN = Pattern.compile("^(#{1,6})\\s+(.+)$", Pattern.MULTILINE);
-    private static final Pattern BOLD_PATTERN = Pattern.compile("\\*\\*(.+?)\\*\\*");
-    private static final Pattern ITALIC_PATTERN = Pattern.compile("\\*(.+?)\\*");
-    private static final Pattern LIST_PATTERN = Pattern.compile("^[-*+]\\s+(.+)$", Pattern.MULTILINE);
-    private static final Pattern NUMBERED_LIST_PATTERN = Pattern.compile("^\\d+\\.\\s+(.+)$", Pattern.MULTILINE);
-    private static final Pattern CODE_BLOCK_PATTERN = Pattern.compile("```[\\s\\S]*?```");
-    private static final Pattern INLINE_CODE_PATTERN = Pattern.compile("`(.+?)`");
+    private static final Logger logger = LoggerFactory.getLogger(PDFGenerationTool.class);
 
-    @Tool(description = "Generate a beautifully formatted PDF file from content that may contain Markdown syntax")
+    // 字体回退列表
+    private static final String[] FONT_FALLBACKS = {
+            // 常见的中文字体
+            "STSongStd-Light",
+            "STSong-Light",
+            "MSungStd-Light",
+            "MHei-Medium",
+            "SimSun",
+            "SimHei",
+            "Microsoft YaHei",
+            "NotoSansCJK-Regular",
+            // 最后回退到标准字体
+            "Helvetica"
+    };
+
+    // 对应的编码
+    private static final String[] ENCODINGS = {
+            "UniGB-UCS2-H",
+            "UniGB-UTF16-H",
+            "Identity-H",
+            PdfEncodings.IDENTITY_H,
+            PdfEncodings.WINANSI
+    };
+
+    @Tool(description = "Generate a PDF file with given content, supports Chinese characters")
     public String generatePDF(
-            @ToolParam(description = "Name of the file to save the generated PDF (without extension)") String fileName,
-            @ToolParam(description = "Content to be included in the PDF, may contain Markdown syntax") String content) {
+            @ToolParam(description = "Name of the file to save the generated PDF (should end with .pdf)") String fileName,
+            @ToolParam(description = "Content to be included in the PDF") String content) {
+
+        // 确保文件名以.pdf结尾
+        if (!fileName.toLowerCase().endsWith(".pdf")) {
+            fileName += ".pdf";
+        }
 
         String fileDir = FileConstant.FILE_SAVE_DIR + "/pdf";
-        String filePath = fileDir + "/" + fileName + ".pdf";
+        String filePath = fileDir + "/" + fileName;
 
         try {
             // 创建目录
             FileUtil.mkdir(fileDir);
-            log.info("开始生成PDF文件: {}", filePath);
 
-            // 创建PDF文档
+            // 获取可用的字体
+            PdfFont font = getAvailableFont();
+
+            // 创建 PdfWriter 和 PdfDocument 对象
             try (PdfWriter writer = new PdfWriter(filePath);
                  PdfDocument pdf = new PdfDocument(writer);
                  Document document = new Document(pdf)) {
 
-                // 设置中文字体
-                PdfFont font = createChineseFont();
-                PdfFont boldFont = createChineseBoldFont();
+                // 设置字体
                 document.setFont(font);
 
-                // 设置页边距
-                document.setMargins(50, 50, 50, 50);
-
-                // 解析并添加内容
-                parseAndAddContent(document, content, font, boldFont);
+                // 创建段落，支持换行
+                String[] lines = content.split("\\r?\\n");
+                for (String line : lines) {
+                    if (!line.trim().isEmpty()) {
+                        Paragraph paragraph = new Paragraph(line)
+                                .setTextAlignment(TextAlignment.LEFT)
+                                .setMarginBottom(5f);
+                        document.add(paragraph);
+                    } else {
+                        // 空行处理
+                        document.add(new Paragraph(" ").setMarginBottom(5f));
+                    }
+                }
             }
 
-            log.info("PDF文件生成成功: {}", filePath);
-            return "PDF generated successfully to: " + filePath;
+            logger.info("PDF generated successfully: {}", filePath);
+            return "PDF文件生成成功，保存路径: " + filePath;
 
         } catch (Exception e) {
-            log.error("生成PDF文件失败: {}", e.getMessage(), e);
-            return "Error generating PDF: " + e.getMessage();
+            logger.error("Error generating PDF: {}", e.getMessage(), e);
+            return "PDF生成失败: " + e.getMessage();
         }
     }
 
     /**
-     * 创建中文字体
+     * 获取可用的字体，按优先级尝试加载
      */
-    private PdfFont createChineseFont() throws IOException {
+    private PdfFont getAvailableFont() throws IOException {
+        // 首先尝试加载自定义字体文件
+        PdfFont customFont = tryLoadCustomFont();
+        if (customFont != null) {
+            logger.info("Successfully loaded custom font");
+            return customFont;
+        }
+
+        // 尝试系统内置字体
+        for (String fontName : FONT_FALLBACKS) {
+            for (String encoding : ENCODINGS) {
+                try {
+                    PdfFont font = PdfFontFactory.createFont(fontName, encoding);
+                    logger.info("Successfully loaded font: {} with encoding: {}", fontName, encoding);
+                    return font;
+                } catch (Exception e) {
+                    logger.debug("Failed to load font: {} with encoding: {}, trying next...", fontName, encoding);
+                }
+            }
+        }
+
+        // 最后回退到标准字体
+        logger.warn("All Chinese fonts failed, falling back to standard font");
+        return PdfFontFactory.createFont();
+    }
+
+    /**
+     * 尝试加载自定义字体文件
+     */
+    private PdfFont tryLoadCustomFont() {
+        String[] customFontPaths = {
+                "src/main/resources/static/fonts/simsun.ttf",
+                "src/main/resources/fonts/simsun.ttf",
+                "fonts/simsun.ttf",
+                "static/fonts/simsun.ttf",
+                // Windows系统字体路径
+                "C:/Windows/Fonts/simsun.ttc",
+                "C:/Windows/Fonts/simhei.ttf",
+                "C:/Windows/Fonts/msyh.ttc",
+                // Linux系统字体路径
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                "/System/Library/Fonts/PingFang.ttc" // macOS
+        };
+
+        for (String fontPath : customFontPaths) {
+            try {
+                if (Files.exists(Paths.get(fontPath))) {
+                    PdfFont font = PdfFontFactory.createFont(fontPath, PdfEncodings.IDENTITY_H);
+                    logger.info("Successfully loaded custom font from: {}", fontPath);
+                    return font;
+                }
+            } catch (Exception e) {
+                logger.debug("Failed to load custom font from: {}, error: {}", fontPath, e.getMessage());
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 检查字体是否支持中文字符
+     */
+    private boolean supportsChinese(PdfFont font) {
         try {
-            // 尝试使用系统字体
-            return PdfFontFactory.createFont("STSongStd-Light", "UniGB-UCS2-H");
+            // 测试一个常见的中文字符
+            return font.containsGlyph('中');
         } catch (Exception e) {
-            log.warn("无法加载中文字体，使用默认字体");
-            return PdfFontFactory.createFont();
+            return false;
         }
-    }
-
-    /**
-     * 创建中文粗体字体
-     */
-    private PdfFont createChineseBoldFont() throws IOException {
-        try {
-            // 尝试使用粗体字体
-            return PdfFontFactory.createFont("STSongStd-Light", "UniGB-UCS2-H");
-        } catch (Exception e) {
-            // 如果无法加载中文字体，使用默认字体
-            log.warn("无法加载中文粗体字体，使用默认字体");
-            return PdfFontFactory.createFont();
-        }
-    }
-
-    /**
-     * 解析Markdown内容并添加到PDF文档
-     */
-    private void parseAndAddContent(Document document, String content, PdfFont font, PdfFont boldFont) {
-        // 预处理：移除代码块（避免干扰其他解析）
-        content = removeCodeBlocks(content);
-
-        // 按行分割内容
-        String[] lines = content.split("\n");
-
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i].trim();
-
-            if (line.isEmpty()) {
-                // 空行，添加间距
-                document.add(new Paragraph(" ").setMarginBottom(5));
-                continue;
-            }
-
-            // 处理标题
-            if (line.matches("^#{1,6}\\s+.+")) {
-                addHeader(document, line, boldFont);
-            }
-            // 处理无序列表
-            else if (line.matches("^[-*+]\\s+.+")) {
-                List list = new List();
-                list.setFont(font);
-
-                // 收集连续的列表项
-                while (i < lines.length && lines[i].trim().matches("^[-*+]\\s+.+")) {
-                    String listItem = lines[i].trim().replaceFirst("^[-*+]\\s+", "");
-                    listItem = cleanMarkdownSyntax(listItem);
-                    list.add(new ListItem(listItem));
-                    i++;
-                }
-                i--; // 回退一行，因为外层循环会自增
-
-                document.add(list.setMarginBottom(10));
-            }
-            // 处理有序列表
-            else if (line.matches("^\\d+\\.\\s+.+")) {
-                List list = new List();
-                list.setFont(font);
-                list.setListSymbol("");
-
-                int listNumber = 1;
-                while (i < lines.length && lines[i].trim().matches("^\\d+\\.\\s+.+")) {
-                    String listItem = lines[i].trim().replaceFirst("^\\d+\\.\\s+", "");
-                    listItem = cleanMarkdownSyntax(listItem);
-                    list.add(new ListItem(listNumber + ". " + listItem));
-                    listNumber++;
-                    i++;
-                }
-                i--; // 回退一行
-
-                document.add(list.setMarginBottom(10));
-            }
-            // 处理普通段落
-            else {
-                String cleanLine = cleanMarkdownSyntax(line);
-                if (!cleanLine.isEmpty()) {
-                    Paragraph paragraph = new Paragraph(cleanLine)
-                            .setFont(font)
-                            .setMarginBottom(8)
-                            .setTextAlignment(TextAlignment.JUSTIFIED);
-                    document.add(paragraph);
-                }
-            }
-        }
-    }
-
-    /**
-     * 添加标题
-     */
-    private void addHeader(Document document, String line, PdfFont boldFont) {
-        Matcher matcher = HEADER_PATTERN.matcher(line);
-        if (matcher.find()) {
-            String hashes = matcher.group(1);
-            String title = matcher.group(2);
-
-            int level = hashes.length();
-            float fontSize = Math.max(20 - (level - 1) * 2, 12); // 根据级别调整字体大小
-
-            Paragraph header = new Paragraph(title)
-                    .setFont(boldFont)
-                    .setFontSize(fontSize)
-                    .setMarginTop(level == 1 ? 20 : 15)
-                    .setMarginBottom(10);
-
-            // 一级标题居中
-            if (level == 1) {
-                header.setTextAlignment(TextAlignment.CENTER)
-                        .setFontColor(ColorConstants.DARK_GRAY);
-            }
-
-            document.add(header);
-        }
-    }
-
-    /**
-     * 清理Markdown语法标记
-     */
-    private String cleanMarkdownSyntax(String text) {
-        // 移除粗体标记
-        text = text.replaceAll("\\*\\*(.+?)\\*\\*", "$1");
-        // 移除斜体标记
-        text = text.replaceAll("(?<!\\*)\\*([^*]+?)\\*(?!\\*)", "$1");
-        // 移除行内代码标记
-        text = text.replaceAll("`(.+?)`", "$1");
-        // 移除链接标记
-        text = text.replaceAll("\\[(.+?)\\]\\(.+?\\)", "$1");
-
-        return text;
-    }
-
-    /**
-     * 移除代码块
-     */
-    private String removeCodeBlocks(String content) {
-        return content.replaceAll("```[\\s\\S]*?```", "");
     }
 }

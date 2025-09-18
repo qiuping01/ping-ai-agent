@@ -41,8 +41,8 @@ public class LoveApp {
     private VectorStore pgVectorVectorStore;
 
     // 用于从云恋爱知识库中检索
-//    @Resource
-//    private Advisor loveAppRagCloudAdvisor;
+    @Resource
+    private Advisor loveAppRagCloudAdvisor;
 
     @Resource
     private QueryRewriter queryRewriter; // 引入查询重写
@@ -129,7 +129,9 @@ public class LoveApp {
                 // 配置对话记忆参数
                 .advisors(spec -> spec
                         .param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)  // 指定对话会话ID
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))       // 设置记忆检索数量（最近10条）
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 20))       // 设置记忆检索数量（最近10条）
+                .advisors(loveAppRagCloudAdvisor)
+                .tools(allTools)
                 .stream()
                 .content()
                 // 添加日志记录
