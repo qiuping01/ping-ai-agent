@@ -10,14 +10,14 @@ spring:
         include-content: true
 
   # 启用 mcp
-    mcp:
-      client:
-#        sse:
-#          connections:
-#            sever1:
-#              url: http://localhost:8127
-        stdio:
-          servers-configuration: classpath:mcp-servers.json
+#    mcp:
+#      client:
+##        sse:
+##          connections:
+##            sever1:
+##              url: http://localhost:8127
+#        stdio:
+#          servers-configuration: classpath:mcp-servers.json
 
 
 #  ai:
