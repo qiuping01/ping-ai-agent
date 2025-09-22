@@ -17,6 +17,6 @@ public class TerminateTool {
             """)
     public String doTerminate() {
         log.info("智能代理调用终止工具，任务执行完成");
-        return "Task completed";
+        return "Task completed,灵蛇智能已完成任务";
     }
 }

@@ -2,6 +2,7 @@ package com.ping.aiagent.controller;
 
 import com.ping.aiagent.agent.QpManus;
 import com.ping.aiagent.app.LoveApp;
+import com.ping.aiagent.app.YiJingApp;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
@@ -21,6 +22,9 @@ public class AiController {
 
     @Resource
     private LoveApp loveApp;
+
+    @Resource
+    private YiJingApp yiJingApp;
 
     @Resource
     private ToolCallback[] allTools;
@@ -101,5 +105,30 @@ public class AiController {
     public SseEmitter doChatWithManus(String message) {
         QpManus qpManus = new QpManus(allTools, dashscopeChatModel);
         return qpManus.runStream(message);
+    }
+
+    /**
+     * SSE 流式调用 AI 易经大师应用 - 方式 3 -灵活
+     *
+     * @param message
+     * @param chatId
+     * @return
+     */
+    @GetMapping(value = "/yiJing_app/chat/sse_emitter")
+    public SseEmitter doChatWithYiJingAppSeeEmitter(String message,
+                                                 String chatId) {
+        // 创建一个超时时间教长的 SseEmitter
+        SseEmitter sseEmitter = new SseEmitter(180000L); // 3分钟超时
+        // 读取 Flux 响应式数据流并且直接通过订阅推送给 SseEmitter
+        yiJingApp.doChatByStream(message, chatId)
+                .subscribe(chunk -> {
+                    try {
+                        sseEmitter.send(chunk);
+                    } catch (IOException e) {
+                        sseEmitter.completeWithError(e);
+                    }
+                }, sseEmitter::completeWithError, sseEmitter::complete);
+        // 返回
+        return sseEmitter;
     }
 }

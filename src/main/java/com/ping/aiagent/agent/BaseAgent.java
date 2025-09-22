@@ -158,7 +158,6 @@ public abstract class BaseAgent {
             } catch (Exception e) {
                 state = AgentState.ERROR;
                 log.error("Error executing agent " + this.name, e);
-
                 try {
                     sseEmitter.send("执行错误：" + e.getMessage());
                     sseEmitter.complete();
@@ -176,7 +175,6 @@ public abstract class BaseAgent {
             this.cleanup();
             log.warn("SSE connection timeout " + this.name);
         });
-
         // 设置完成回调
         sseEmitter.onCompletion(() -> {
             if(this.state == AgentState.RUNNING){
@@ -185,10 +183,10 @@ public abstract class BaseAgent {
             this.cleanup();
             log.info("SSE connection completed " + this.name);
         });
-
-
         return sseEmitter;
     }
+
+
 
     /**
      * 定义单个步骤
